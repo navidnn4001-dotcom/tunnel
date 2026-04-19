@@ -1,0 +1,29 @@
+name: tunnel
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install SSH
+        run: |
+          apt update
+          apt install -y openssh-server curl
+
+      - name: Setup SSH
+        run: |
+          mkdir -p /var/run/sshd
+          echo 'root:root' | chpasswd
+          sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+          service ssh start
+
+      - name: Install Cloudflared
+        run: |
+          wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+          dpkg -i cloudflared-linux-amd64.deb
+
+      - name: Run Tunnel
+        run: |
+          cloudflared tunnel --url ssh://localhost:22
