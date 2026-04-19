@@ -6,6 +6,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Install SSH
         run: |
@@ -19,11 +20,8 @@ jobs:
           sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
           service ssh start
 
-      - name: Install Cloudflared
+      - name: Start Tunnel
         run: |
-          wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
-          dpkg -i cloudflared-linux-amd64.deb
-
-      - name: Run Tunnel
-        run: |
-          cloudflared tunnel --url ssh://localhost:22
+          curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+          chmod +x cloudflared
+          ./cloudflared tunnel --url ssh://localhost:22
